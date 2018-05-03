@@ -2,10 +2,12 @@
 #
 # Table name: shortened_urls
 #
-#  id        :bigint(8)        not null, primary key
-#  long_url  :string           not null
-#  short_url :string           not null
-#  user_id   :integer          not null
+#  id         :bigint(8)        not null, primary key
+#  long_url   :string           not null
+#  short_url  :string           not null
+#  user_id    :integer          not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
 #
 
 class ShortenedUrl < ApplicationRecord
@@ -23,6 +25,7 @@ class ShortenedUrl < ApplicationRecord
     class_name: 'Visit'
     
   has_many :visitors,
+    -> { distinct },
     through: :visits,
     source: :users
     
@@ -39,12 +42,15 @@ class ShortenedUrl < ApplicationRecord
   end
   
   def num_clicks
+    self.visits.count
   end
   
   def num_uniques
+    visitors.count
   end
   
   def num_recent_uniques
+    visits.select('user_id').where('created_at > ?', 10.minutes.ago).distinct.count
   end
     
 end
